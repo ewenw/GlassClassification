@@ -25,14 +25,12 @@ Attribute Information:
 data <- read.csv(url("https://archive.ics.uci.edu/ml/machine-learning-databases/glass/glass.data"))
 summary(data)
 names(data) <- c('Id', 'RI', 'Na', 'Mg', 'Al' , 'Si', 'K', 'Ca', 'Ba', 'Fe', 'Type')
-
-
+data <- data[, -c(1)]
 outlierImpute <- function(x) {
   x[x < quantile(x, 0.25) - 1.5 * IQR(x) | x > quantile(x, 0.75) + 1.5 * IQR(x)] <- median(x)
 }
 lapply(data, outlierImpute)
 
-data <- data[, -c(1)]
 ```
 
 
@@ -99,7 +97,6 @@ classify <- function(features, k=11){
   mode <- names(sort(-table(selection)))[1]
   return(mode)
 }
-
 classify(data[213,c(1:9)])
 
 ```
@@ -113,7 +110,6 @@ accuracy <- function(k=11){
   corrects <- evaluationData[abs(as.numeric(evaluationData$ClassifiedType)-as.numeric(evaluationData$Type))<=1,]
   return(nrow(corrects) / nrow(evaluationData))
 }
-
 accuracy(10)
 ```
 
