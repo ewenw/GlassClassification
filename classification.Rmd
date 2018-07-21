@@ -57,7 +57,7 @@ zStandardize <- function(x){
   m <- mean(x)
   z <- (x - m) / sigma
 }
-names <- c(1:9)
+names <- c(3:9)
 data[, names] <- lapply(data[,names], zStandardize)
 ```
 
