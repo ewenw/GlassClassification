@@ -30,8 +30,7 @@ Import data and impute outliers
 data <- read.csv(url("https://archive.ics.uci.edu/ml/machine-learning-databases/glass/glass.data"))
 summary(data)
 names(data) <- c('Id', 'RI', 'Na', 'Mg', 'Al' , 'Si', 'K', 'Ca', 'Ba', 'Fe', 'Type')
-d <- density(data$Si)
-plot(d)
+
 
 outlierImpute <- function(x) {
   x[x < quantile(x, 0.25) - 1.5 * IQR(x) | x > quantile(x, 0.75) + 1.5 * IQR(x)] <- median(x)
@@ -52,6 +51,7 @@ minMax <- function(x){
 }
 data[, 1] <- minMax(data[, 1])
 data[, 2] <- minMax(data[, 2])
+
 ```
 
 
@@ -62,18 +62,18 @@ zStandardize <- function(x){
   m <- mean(x)
   z <- (x - m) / sigma
 }
-names <- c(3:9)
+names <- c(1:9)
 data[, names] <- lapply(data[,names], zStandardize)
 ```
 
 
 Stratefied sampling from each type of glass
 ```{r}
-selectSample <- function(type, data){
+selectSample <- function(type, data, trainingRatio=0.5){
   rows <- data[data$Type == type,]
   if(nrow(rows) == 0)
     return(data)
-  indices <- sample(1:nrow(rows), 0.5 * nrow(rows), replace=F)
+  indices <- sample(1:nrow(rows), trainingRatio * nrow(rows), replace=F)
   rows[indices, ]$Use <- 'Training'
   rows[-indices, ]$Use <- 'Evaluation'
   data[data$Type == type,] <- rows
@@ -81,7 +81,7 @@ selectSample <- function(type, data){
 }
 data$Use <- NA
 for(i in 1:7){
-  data <- selectSample(i, data)
+  data <- selectSample(i, data, 0.5)
 }
 ```
 
@@ -95,7 +95,7 @@ euclideanDistance <- function(a, b){
 }
 
 # classify features vector from data's k nearest neighbors
-classify <- function(features, data, k=11){
+classify <- function(features, k=11){
   trainingData <- data[data$Use=='Training',]
   #features <- do.call("rbind", replicate(nrow(trainingData), features, simplify = FALSE))
   ?sapply
@@ -106,8 +106,28 @@ classify <- function(features, data, k=11){
   return(mode)
 }
 
-classify(data[213,c(1:9)], data)
-testPoint <- c(1.51, 12.53, 3.48, 1.39, 73.39, 0.60, 8.55, 0.0, 0.05)
+classify(data[213,c(1:9)])
 
 ```
 
+
+Evaluation
+```{r}
+accuracy <- function(k=11){
+  evaluationData <- data[data$Use=='Evaluation',]
+  evaluationData$ClassifiedType <- apply(evaluationData[, c(1:9)], 1, classify, k)
+  corrects <- evaluationData[abs(as.numeric(evaluationData$ClassifiedType)-as.numeric(evaluationData$Type))<=1,]
+  return(nrow(corrects) / nrow(evaluationData))
+}
+
+accuracy(10)
+```
+
+
+Visualization
+```{r}
+accuracies <- data.frame('k'=c(5:12))
+accuracies$Acc <- sapply(accuracies$k, accuracy)
+plot(accuracies)
+# k=8 has the best accuracy of 0.8532
+```
