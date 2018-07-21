@@ -86,3 +86,28 @@ for(i in 1:7){
 ```
 
 
+k-NN Classfication
+```{r}
+euclideanDistance <- function(a, b){
+  squareDiffs <- (a - b) ^ 2
+  dist <- sqrt(sum(squareDiffs))
+  return(dist)
+}
+
+# classify features vector from data's k nearest neighbors
+classify <- function(features, data, k=11){
+  trainingData <- data[data$Use=='Training',]
+  #features <- do.call("rbind", replicate(nrow(trainingData), features, simplify = FALSE))
+  ?sapply
+  trainingData$DistanceFromPoint <- apply(trainingData[,c(1:9)], 1, euclideanDistance, features)
+  trainingData <- trainingData[order(trainingData$DistanceFromPoint),]
+  selection <- trainingData[c(1:k),'Type']
+  mode <- names(sort(-table(selection)))[1]
+  return(mode)
+}
+
+classify(data[213,c(1:9)], data)
+testPoint <- c(1.51, 12.53, 3.48, 1.39, 73.39, 0.60, 8.55, 0.0, 0.05)
+
+```
+
