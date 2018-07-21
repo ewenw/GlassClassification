@@ -20,7 +20,7 @@ Attribute Information:
       -- 6 tableware
       -- 7 headlamps
     
-*Import data and impute outliers*
+## Import data and impute outliers
 ```{r}
 data <- read.csv(url("https://archive.ics.uci.edu/ml/machine-learning-databases/glass/glass.data"))
 summary(data)
@@ -36,7 +36,7 @@ data <- data[, -c(1)]
 ```
 
 
-Min-max normalization
+## Min-max normalization
 ```{r}
 
 minMax <- function(x){
@@ -50,7 +50,7 @@ data[, 2] <- minMax(data[, 2])
 ```
 
 
-Z-score standardization
+## Z-score standardization
 ```{r}
 zStandardize <- function(x){
   sigma <- sd(x)
@@ -62,7 +62,7 @@ data[, names] <- lapply(data[,names], zStandardize)
 ```
 
 
-Stratefied sampling from each type of glass
+## Stratefied sampling from each class
 ```{r}
 selectSample <- function(type, data, trainingRatio=0.5){
   rows <- data[data$Type == type,]
@@ -81,7 +81,7 @@ for(i in 1:7){
 ```
 
 
-k-NN Classfication
+## k-NN Classfication
 ```{r}
 euclideanDistance <- function(a, b){
   squareDiffs <- (a - b) ^ 2
@@ -105,7 +105,7 @@ classify(data[213,c(1:9)])
 ```
 
 
-Evaluation
+## Evaluation of accuracy
 ```{r}
 accuracy <- function(k=11){
   evaluationData <- data[data$Use=='Evaluation',]
@@ -118,7 +118,7 @@ accuracy(10)
 ```
 
 
-Visualization
+## Visualization of k (x-axis) versus accuracy
 ```{r}
 accuracies <- data.frame('k'=c(5:12))
 accuracies$Acc <- sapply(accuracies$k, accuracy)
