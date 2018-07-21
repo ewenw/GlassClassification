@@ -1,0 +1,88 @@
+---
+title: "Glass Classification"
+output: html_notebook
+---
+
+
+Attribute Information:
+   1. Id number: 1 to 214
+   2. RI: refractive index
+   3. Na: Sodium (unit measurement: weight percent in corresponding oxide, as 
+                  are attributes 4-10)
+   4. Mg: Magnesium
+   5. Al: Aluminum
+   6. Si: Silicon
+   7. K: Potassium
+   8. Ca: Calcium
+   9. Ba: Barium
+  10. Fe: Iron
+  11. Type of glass: (class attribute)
+      -- 1 building_windows_float_processed
+      -- 2 building_windows_non_float_processed
+      -- 3 vehicle_windows_float_processed
+      -- 4 vehicle_windows_non_float_processed (none in this database)
+      -- 5 containers
+      -- 6 tableware
+      -- 7 headlamps
+    
+Import data and impute outliers
+```{r}
+data <- read.csv(url("https://archive.ics.uci.edu/ml/machine-learning-databases/glass/glass.data"))
+summary(data)
+names(data) <- c('Id', 'RI', 'Na', 'Mg', 'Al' , 'Si', 'K', 'Ca', 'Ba', 'Fe', 'Type')
+d <- density(data$Si)
+plot(d)
+
+outlierImpute <- function(x) {
+  x[x < quantile(x, 0.25) - 1.5 * IQR(x) | x > quantile(x, 0.75) + 1.5 * IQR(x)] <- median(x)
+}
+lapply(data, outlierImpute)
+
+data <- data[, -c(1)]
+```
+
+
+Min-max normalization
+```{r}
+
+minMax <- function(x){
+  min <- min(data[, 1])
+  max <- max(data[, 1])
+  x <- (x - min) / (max - x) 
+}
+data[, 1] <- minMax(data[, 1])
+data[, 2] <- minMax(data[, 2])
+```
+
+
+Z-score standardization
+```{r}
+zStandardize <- function(x){
+  sigma <- sd(x)
+  m <- mean(x)
+  z <- (x - m) / sigma
+}
+names <- c(3:9)
+data[, names] <- lapply(data[,names], zStandardize)
+```
+
+
+Stratefied sampling from each type of glass
+```{r}
+selectSample <- function(type, data){
+  rows <- data[data$Type == type,]
+  if(nrow(rows) == 0)
+    return(data)
+  indices <- sample(1:nrow(rows), 0.5 * nrow(rows), replace=F)
+  rows[indices, ]$Use <- 'Training'
+  rows[-indices, ]$Use <- 'Evaluation'
+  data[data$Type == type,] <- rows
+  return(data)
+}
+data$Use <- NA
+for(i in 1:7){
+  data <- selectSample(i, data)
+}
+```
+
+
