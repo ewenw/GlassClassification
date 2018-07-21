@@ -98,7 +98,6 @@ euclideanDistance <- function(a, b){
 classify <- function(features, k=11){
   trainingData <- data[data$Use=='Training',]
   #features <- do.call("rbind", replicate(nrow(trainingData), features, simplify = FALSE))
-  ?sapply
   trainingData$DistanceFromPoint <- apply(trainingData[,c(1:9)], 1, euclideanDistance, features)
   trainingData <- trainingData[order(trainingData$DistanceFromPoint),]
   selection <- trainingData[c(1:k),'Type']
