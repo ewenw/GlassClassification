@@ -1,9 +1,4 @@
----
-title: "Glass Classification"
-output: html_notebook
----
-
-
+Data from https://archive.ics.uci.edu/ml/machine-learning-databases/glass/glass.data
 Attribute Information:
    1. Id number: 1 to 214
    2. RI: refractive index
@@ -25,7 +20,7 @@ Attribute Information:
       -- 6 tableware
       -- 7 headlamps
     
-Import data and impute outliers
+*Import data and impute outliers*
 ```{r}
 data <- read.csv(url("https://archive.ics.uci.edu/ml/machine-learning-databases/glass/glass.data"))
 summary(data)
